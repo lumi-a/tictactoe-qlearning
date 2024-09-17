@@ -57,9 +57,9 @@ impl Board {
         board
     }
 
-    pub fn random_x_board() -> Board {
+    pub fn random_nonterminal_x_board() -> Board {
         let mut rng = rand::thread_rng();
-        let num_pieces = rng.gen_range(0..5) * 2;
+        let num_pieces = rng.gen_range(0..=3) * 2;
         let mut board = Board::empty();
         let mut pieces = [
             (0, 0),
