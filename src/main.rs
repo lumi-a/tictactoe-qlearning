@@ -10,16 +10,22 @@ type State = Board;
 type Action = (usize, usize);
 type Float = OrderedFloat<f64>;
 fn qlearning_for_x() -> HashMap<(State, Action), Float> {
+    fn reward(winner: Player) -> Float {
+        Float::from(match winner {
+            Player::X => 1.0,
+            Player::O => -1.0,
+        })
+    }
     const NUM_TRIALS: usize = 1e6 as usize;
-    let γ = Float::from(0.999);
+    let γ = Float::from(0.99);
 
     let mut rng = rand::thread_rng();
     let mut q: HashMap<(State, Action), Float> = HashMap::new();
 
     for i in 0..NUM_TRIALS {
-        let s: State = Board::random_x_board();
-        let ε: f64 = 1.0 / (i as f64 + 1.0);
-        let α: Float = Float::from(ε);
+        let s: State = Board::random_nonterminal_x_board();
+        let ε: f64 = 0.01;
+        let α: Float = Float::from(0.01);
         // Sample a ε-greedily
         let possible_actions = s.get_unoccupied();
         let a: Action = if rng.gen_bool(ε) {
@@ -29,22 +35,36 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
                 .iter()
                 .max_by_key(|a| {
                     q.entry((s.clone(), **a))
-                        .or_insert(Float::from(random::<f64>()))
+                        .or_insert(Float::from(0.0))
                         .clone()
                 })
                 .unwrap()
         };
 
-        let next_s = {
+        let (next_s, r) = {
             let mut next = s.clone();
+            let mut r = Float::from(0.0);
             next[a] = Square::Occupied(Player::X);
-            next
+
+            // Did X already win?
+            if let Some(winner) = next.get_winner() {
+                (next, reward(winner))
+            } else {
+                let next_possible_actions = next.get_unoccupied();
+                if !next_possible_actions.is_empty() {
+                    next[*next_possible_actions.choose(&mut rng).unwrap()] =
+                        Square::Occupied(Player::O);
+                    if let Some(winner) = next.get_winner() {
+                        (next, reward(winner))
+                    } else {
+                        (next, Float::from(0.0))
+                    }
+                } else {
+                    // Draw
+                    (next, Float::from(0.0))
+                }
+            }
         };
-        let r = Float::from(match next_s.get_winner() {
-            Some(Player::X) => 1.0,
-            Some(Player::O) => -1.0,
-            _ => 0.0,
-        });
 
         let maxi = {
             let possible_actions = next_s.get_unoccupied();
@@ -52,7 +72,7 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
                 .iter()
                 .map(|a| {
                     q.entry((next_s.clone(), *a))
-                        .or_insert(Float::from(random::<f64>()))
+                        .or_insert(Float::from(0.0))
                         .clone()
                 })
                 .max()
@@ -60,7 +80,7 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
         };
         let index = (s.clone(), a);
         if !q.contains_key(&index) {
-            q.insert(index.clone(), Float::from(random::<f64>()));
+            q.insert(index.clone(), Float::from(0.0));
         }
         let value = (Float::from(1.0) - α) * q[&index] + α * (r + γ * maxi);
         q.insert(index, value);
@@ -95,7 +115,11 @@ fn main() {
             let possible_actions = board.get_unoccupied();
             let a = *possible_actions
                 .iter()
-                .max_by_key(|a| q[&(board.clone(), **a)])
+                .max_by_key(|a| {
+                    q.get(&(board.clone(), **a))
+                        .cloned()
+                        .unwrap_or(Float::from(0.0))
+                })
                 .unwrap();
             board[a] = Square::Occupied(Player::X);
         } else {
