@@ -153,3 +153,18 @@ impl std::ops::IndexMut<(usize, usize)> for Board {
         &mut self.0[x][y]
     }
 }
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for ys in self.0 {
+            for y in ys {
+                match y {
+                    Square::Occupied(Player::X) => write!(f, "X")?,
+                    Square::Occupied(Player::O) => write!(f, "O")?,
+                    Square::Empty => write!(f, ".")?,
+                }
+            }
+            writeln!(f)?;
+        }
+        Ok(())
+    }
+}
