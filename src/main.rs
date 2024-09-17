@@ -10,7 +10,7 @@ type State = Board;
 type Action = (usize, usize);
 type Float = OrderedFloat<f64>;
 fn qlearning_for_x() -> HashMap<(State, Action), Float> {
-    const NUM_TRIALS: usize = 1e7 as usize;
+    const NUM_TRIALS: usize = 1e6 as usize;
     let γ = Float::from(0.999);
 
     let mut rng = rand::thread_rng();
