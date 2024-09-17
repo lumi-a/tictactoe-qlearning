@@ -85,7 +85,7 @@ impl Board {
         board
     }
 
-    pub fn get_current_player(self) -> Player {
+    pub fn get_current_player(&self) -> Player {
         let mut pieces = 0;
         for ys in self.0 {
             for y in ys {
@@ -103,7 +103,7 @@ impl Board {
         }
     }
 
-    pub fn get_winner(self) -> Option<Player> {
+    pub fn get_winner(&self) -> Option<Player> {
         let check_win =
             |a: (usize, usize), b: (usize, usize), c: (usize, usize)| -> Option<Player> {
                 if self[a] == self[b] && self[a] == self[c] && self[a] != Square::Empty {
@@ -130,7 +130,7 @@ impl Board {
         None
     }
 
-    pub fn get_unoccupied(self) -> Vec<(usize, usize)> {
+    pub fn get_unoccupied(&self) -> Vec<(usize, usize)> {
         let mut unoccupied = Vec::new();
         for x in 0..3 {
             for y in 0..3 {
