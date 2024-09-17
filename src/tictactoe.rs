@@ -148,3 +148,8 @@ impl std::ops::Index<(usize, usize)> for Board {
         &self.0[x][y]
     }
 }
+impl std::ops::IndexMut<(usize, usize)> for Board {
+    fn index_mut(&mut self, (x, y): (usize, usize)) -> &mut Self::Output {
+        &mut self.0[x][y]
+    }
+}
