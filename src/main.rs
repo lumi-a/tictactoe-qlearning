@@ -33,11 +33,7 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
         } else {
             *possible_actions
                 .iter()
-                .max_by_key(|a| {
-                    q.entry((s.clone(), **a))
-                        .or_insert(Float::from(0.0))
-                        .clone()
-                })
+                .max_by_key(|a| *q.entry((s.clone(), **a)).or_insert(Float::from(0.0)))
                 .unwrap()
         };
 
@@ -69,11 +65,7 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
             let possible_actions = next_s.get_unoccupied();
             possible_actions
                 .iter()
-                .map(|a| {
-                    q.entry((next_s.clone(), *a))
-                        .or_insert(Float::from(0.0))
-                        .clone()
-                })
+                .map(|a| *q.entry((next_s.clone(), *a)).or_insert(Float::from(0.0)))
                 .max()
                 .unwrap_or(Float::from(0))
         };
@@ -87,14 +79,14 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
     q
 }
 
-fn _get_human_input(possible_actions: &Vec<Action>) -> Action {
+fn _get_human_input(possible_actions: &[Action]) -> Action {
     let mut input: String;
     loop {
         input = String::new();
         std::io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        let coors: Vec<&str> = input.trim().split_whitespace().into_iter().collect();
+        let coors: Vec<&str> = input.split_whitespace().collect();
         if coors.len() == 2 {
             let x = coors[0].parse::<usize>().unwrap();
             let y = coors[1].parse::<usize>().unwrap();
@@ -130,7 +122,7 @@ fn play_orandom(q: HashMap<(State, Action), Float>) -> Option<Player> {
         }
         i += 1;
     }
-    return board.get_winner();
+    board.get_winner()
 }
 fn main() {
     let q = qlearning_for_x();

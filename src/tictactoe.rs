@@ -46,14 +46,12 @@ impl Board {
                 (2, 2),
             ];
             pieces.shuffle(rng);
-            let mut i = 0;
-            for p in &pieces[0..num_pieces] {
+            for (i, p) in pieces[0..num_pieces].iter().enumerate() {
                 board.0[p.0][p.1] = if i % 2 == 0 {
                     Square::Occupied(Player::X)
                 } else {
                     Square::Occupied(Player::O)
                 };
-                i += 1;
             }
             board
         }
