@@ -6,3 +6,5 @@ Q-Learning: 98.95%
 Random:     00.78%
 Draws:      00.27%
 ```
+
+I used Rust for speed and type-safety, though the code does look clunky for something as simple as TicTacToe. If rewritten, it probably should have some abstract game-traits (having states, transition-functions, rewards, etc.).
