@@ -17,18 +17,18 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
         })
     }
     const NUM_TRIALS: usize = 1e6 as usize;
-    let γ = Float::from(0.99);
+    let gamma = Float::from(0.99);
 
     let mut rng = rand::thread_rng();
     let mut q: HashMap<(State, Action), Float> = HashMap::new();
 
     for i in 0..NUM_TRIALS {
         let s: State = Board::random_nonterminal_x_board();
-        let ε: f64 = 0.01;
-        let α: Float = Float::from(0.01);
+        let epsilon: f64 = 1.0 / f64::sqrt(i as f64 + 1.0);
+        let alpha: Float = Float::from(epsilon);
         // Sample a ε-greedily
         let possible_actions = s.get_unoccupied();
-        let a: Action = if rng.gen_bool(ε) {
+        let a: Action = if rng.gen_bool(epsilon) {
             *possible_actions.iter().choose(&mut rng).unwrap()
         } else {
             *possible_actions
@@ -43,7 +43,6 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
 
         let (next_s, r) = {
             let mut next = s.clone();
-            let mut r = Float::from(0.0);
             next[a] = Square::Occupied(Player::X);
 
             // Did X already win?
@@ -82,13 +81,13 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
         if !q.contains_key(&index) {
             q.insert(index.clone(), Float::from(0.0));
         }
-        let value = (Float::from(1.0) - α) * q[&index] + α * (r + γ * maxi);
+        let value = (Float::from(1.0) - alpha) * q[&index] + alpha * (r + gamma * maxi);
         q.insert(index, value);
     }
     q
 }
 
-fn get_human_input(possible_actions: &Vec<Action>) -> Action {
+fn _get_human_input(possible_actions: &Vec<Action>) -> Action {
     let mut input: String;
     loop {
         input = String::new();
