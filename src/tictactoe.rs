@@ -29,58 +29,38 @@ impl Board {
         Board([[Square::Empty; 3]; 3])
     }
 
-    pub fn random_nonfull_board() -> Board {
-        let mut rng = rand::thread_rng();
-        let num_pieces = rng.gen_range(0..9);
-        let mut board = Board::empty();
-        let mut pieces = [
-            (0, 0),
-            (0, 1),
-            (0, 2),
-            (1, 0),
-            (1, 1),
-            (1, 2),
-            (2, 0),
-            (2, 1),
-            (2, 2),
-        ];
-        pieces.shuffle(&mut rng);
-        let mut i = 0;
-        for p in &pieces[0..num_pieces] {
-            board.0[p.0][p.1] = if i % 2 == 0 {
-                Square::Occupied(Player::X)
-            } else {
-                Square::Occupied(Player::O)
-            };
-            i += 1;
-        }
-        board
-    }
-
     pub fn random_nonterminal_x_board() -> Board {
         let mut rng = rand::thread_rng();
-        let num_pieces = rng.gen_range(0..=4) * 2;
-        let mut board = Board::empty();
-        let mut pieces = [
-            (0, 0),
-            (0, 1),
-            (0, 2),
-            (1, 0),
-            (1, 1),
-            (1, 2),
-            (2, 0),
-            (2, 1),
-            (2, 2),
-        ];
-        pieces.shuffle(&mut rng);
-        let mut i = 0;
-        for p in &pieces[0..num_pieces] {
-            board.0[p.0][p.1] = if i % 2 == 0 {
-                Square::Occupied(Player::X)
-            } else {
-                Square::Occupied(Player::O)
-            };
-            i += 1;
+        fn random_board(rng: &mut ThreadRng) -> Board {
+            let num_pieces = rng.gen_range(0..=4) * 2;
+            let mut board = Board::empty();
+            let mut pieces = [
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (1, 0),
+                (1, 1),
+                (1, 2),
+                (2, 0),
+                (2, 1),
+                (2, 2),
+            ];
+            pieces.shuffle(rng);
+            let mut i = 0;
+            for p in &pieces[0..num_pieces] {
+                board.0[p.0][p.1] = if i % 2 == 0 {
+                    Square::Occupied(Player::X)
+                } else {
+                    Square::Occupied(Player::O)
+                };
+                i += 1;
+            }
+            board
+        }
+
+        let mut board = random_board(&mut rng);
+        while board.get_winner().is_some() {
+            board = random_board(&mut rng);
         }
         board
     }
