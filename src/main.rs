@@ -104,9 +104,10 @@ fn _get_human_input(possible_actions: &Vec<Action>) -> Action {
         }
     }
 }
-fn main() {
+
+fn play_orandom(q: HashMap<(State, Action), Float>) -> Option<Player> {
+    let mut rng = rand::thread_rng();
     let mut board = Board::empty();
-    let q = qlearning_for_x();
     let mut i = 0;
     while board.get_winner().is_none() && !board.get_unoccupied().is_empty() {
         if i % 2 == 0 {
@@ -122,12 +123,39 @@ fn main() {
                 .unwrap();
             board[a] = Square::Occupied(Player::X);
         } else {
-            // Human
+            // Random
             let possible_actions = board.get_unoccupied();
-            let a = get_human_input(&possible_actions);
+            let a = *possible_actions.choose(&mut rng).unwrap();
             board[a] = Square::Occupied(Player::O);
         }
         i += 1;
-        println!("{}\n\n", board);
     }
+    return board.get_winner();
+}
+fn main() {
+    let q = qlearning_for_x();
+    println!("Learned.");
+    let mut q_wins = 0;
+    let mut r_wins = 0;
+    let mut draws = 0;
+    const NUM_GAMES: usize = 1e4 as usize;
+    for _ in 0..NUM_GAMES {
+        match play_orandom(q.clone()) {
+            Some(Player::X) => q_wins += 1,
+            Some(Player::O) => r_wins += 1,
+            None => draws += 1,
+        }
+    }
+    println!(
+        "Q-Learning: {}",
+        (100.0 * (q_wins as f64) / (NUM_GAMES as f64)) as usize
+    );
+    println!(
+        "Random:     {}",
+        (100.0 * (r_wins as f64) / (NUM_GAMES as f64)) as usize
+    );
+    println!(
+        "Draws:      {}",
+        (100.0 * (draws as f64) / (NUM_GAMES as f64)) as usize
+    );
 }
