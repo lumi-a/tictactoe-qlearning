@@ -1,5 +1,6 @@
 use rand::prelude::*;
 
+/// Two players, X and O. X always goes first.
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Player {
     X,
@@ -16,21 +17,28 @@ impl From<Square> for Player {
     }
 }
 
+/// A square on a board, either occupied by a player or empty
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Square {
     Occupied(Player),
     Empty,
 }
 
+/// A 3x3 tic-tac-toe board
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Board([[Square; 3]; 3]);
 impl Board {
+    /// Return an empty board
     pub fn empty() -> Board {
         Board([[Square::Empty; 3]; 3])
     }
 
+    /// Return a random board where x is about to move,
+    /// and nobody has won yet.
     pub fn random_nonterminal_x_board() -> Board {
         let mut rng = rand::thread_rng();
+
+        // Function that just generates some random board
         fn random_board(rng: &mut ThreadRng) -> Board {
             let num_pieces = rng.gen_range(0..=4) * 2;
             let mut board = Board::empty();
@@ -57,31 +65,16 @@ impl Board {
         }
 
         let mut board = random_board(&mut rng);
+        // Run random_board until we find a non-winning one
         while board.get_winner().is_some() {
             board = random_board(&mut rng);
         }
         board
     }
 
-    pub fn get_current_player(&self) -> Player {
-        let mut pieces = 0;
-        for ys in self.0 {
-            for y in ys {
-                match y {
-                    Square::Occupied(Player::X) => pieces += 1,
-                    Square::Occupied(Player::O) => pieces -= 1,
-                    Square::Empty => {}
-                }
-            }
-        }
-        if pieces > 0 {
-            Player::O
-        } else {
-            Player::X
-        }
-    }
-
+    /// Return the winning player (if there is one)
     pub fn get_winner(&self) -> Option<Player> {
+        // Checks if three squares are occupied and equal
         let check_win =
             |a: (usize, usize), b: (usize, usize), c: (usize, usize)| -> Option<Player> {
                 if self[a] == self[b] && self[a] == self[c] && self[a] != Square::Empty {
@@ -108,6 +101,7 @@ impl Board {
         None
     }
 
+    /// Returns the unoccupied squares on the board
     pub fn get_unoccupied(&self) -> Vec<(usize, usize)> {
         let mut unoccupied = Vec::new();
         for x in 0..3 {
