@@ -17,23 +17,23 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
         })
     }
     const NUM_TRIALS: usize = 1e6 as usize;
-    let gamma = Float::from(0.99);
+    let gamma = Float::from(0.95);
 
     let mut rng = rand::thread_rng();
     let mut q: HashMap<(State, Action), Float> = HashMap::new();
 
     for i in 0..NUM_TRIALS {
         let s: State = Board::random_nonterminal_x_board();
-        let epsilon: f64 = 1.0 / f64::sqrt(i as f64 + 1.0);
+        let epsilon = 0.1f64.max(1.0 - i as f64 / (NUM_TRIALS as f64 / 2.0));
         let alpha: Float = Float::from(epsilon);
-        // Sample a ε-greedily
+        // Sample α ε-greedily
         let possible_actions = s.get_unoccupied();
         let a: Action = if rng.gen_bool(epsilon) {
             *possible_actions.iter().choose(&mut rng).unwrap()
         } else {
             *possible_actions
                 .iter()
-                .max_by_key(|a| *q.entry((s.clone(), **a)).or_insert(Float::from(0.0)))
+                .max_by_key(|a| *q.entry((s.clone(), **a)).or_insert(Float::from(1.0)))
                 .unwrap()
         };
 
@@ -65,13 +65,13 @@ fn qlearning_for_x() -> HashMap<(State, Action), Float> {
             let possible_actions = next_s.get_unoccupied();
             possible_actions
                 .iter()
-                .map(|a| *q.entry((next_s.clone(), *a)).or_insert(Float::from(0.0)))
+                .map(|a| *q.entry((next_s.clone(), *a)).or_insert(Float::from(1.0)))
                 .max()
                 .unwrap_or(Float::from(0))
         };
         let index = (s.clone(), a);
         if !q.contains_key(&index) {
-            q.insert(index.clone(), Float::from(0.0));
+            q.insert(index.clone(), Float::from(1.0));
         }
         let value = (Float::from(1.0) - alpha) * q[&index] + alpha * (r + gamma * maxi);
         q.insert(index, value);
@@ -138,16 +138,7 @@ fn main() {
             None => draws += 1,
         }
     }
-    println!(
-        "Q-Learning: {}",
-        (100.0 * (q_wins as f64) / (NUM_GAMES as f64)) as usize
-    );
-    println!(
-        "Random:     {}",
-        (100.0 * (r_wins as f64) / (NUM_GAMES as f64)) as usize
-    );
-    println!(
-        "Draws:      {}",
-        (100.0 * (draws as f64) / (NUM_GAMES as f64)) as usize
-    );
+    println!("Q-Learning: {}", (q_wins as f64) / (NUM_GAMES as f64));
+    println!("Random:     {}", (r_wins as f64) / (NUM_GAMES as f64));
+    println!("Draws:      {}", (draws as f64) / (NUM_GAMES as f64));
 }
