@@ -1,4 +1,4 @@
-A super-basic implementation of [Q-learning](https://en.wikipedia.org/wiki/Q-learning) for TicTacToe in Rust, so that I improve my understanding of the lecture-material for a class on Reinforcement-Learning.
+A super-basic implementation of [Q-learning](https://en.wikipedia.org/wiki/Q-learning) for TicTacToe in Rust, so that I improve my understanding of the lecture-material of a Reinforcement-Learning-class.
 
 Run with `cargo run -r`. This first trains the quality-function-policy, and then plays a tournament against a random player. Results will be around:
 ```
